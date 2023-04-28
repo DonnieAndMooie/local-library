@@ -1,0 +1,1 @@
+This project will create a simple library site using Node and Express, following the tutorial on MDN.
