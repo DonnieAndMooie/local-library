@@ -15,11 +15,32 @@ async function main() {
   await mongoose.connect(mongoDB);
 }
 
+const compression = require("compression");
+const helmet = require("helmet");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const catalogRouter = require("./routes/catalog");
 
 const app = express();
+
+app.use(compression());
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["self", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  }),
+);
+
+const RateLimit = require("express-rate-limit");
+
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 20,
+});
+
+app.use(limiter);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
