@@ -4,9 +4,10 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 mongoose.set("strictQuery", false);
-const mongoDB = "mongodb+srv://owenjeaves:Boggle11@cluster0.yueqitj.mongodb.net/local_library?retryWrites=true&w=majority";
+const mongoDB = process.env.DATABASE_URL;
 
 main().catch((err) => console.log(err));
 
