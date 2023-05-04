@@ -64,11 +64,38 @@ exports.genre_create_post = [
 ];
 
 exports.genre_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre delete GET");
+  const [genre, allBooksWithGenre] = await Promise.all([
+    Genre.findById(req.params.id).exec(),
+    Book.find({ genre: req.params.id }).exec(),
+  ]);
+
+  if (genre === null) {
+    res.redirect("/catalog/genres");
+  }
+
+  res.render("genre_delete", {
+    title: "Delete Genre",
+    genre,
+    genre_books: allBooksWithGenre,
+  });
 });
 
 exports.genre_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre delete POST");
+  const [genre, allBooksWithGenre] = await Promise.all([
+    Genre.findById(req.params.id).exec(),
+    Book.find({ genre: req.params.id }).exec(),
+  ]);
+
+  if (allBooksWithGenre.length > 0) {
+    res.render("genre_delete", {
+      title: "Delete Genre",
+      genre,
+      genre_books: allBooksWithGenre,
+    });
+  } else {
+    await Genre.findByIdAndRemove(req.body.genreid);
+    res.redirect("/catalog/genres");
+  }
 });
 
 exports.genre_update_get = asyncHandler(async (req, res, next) => {
