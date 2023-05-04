@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 mongoose.set("strictQuery", false);
-const mongoDB = process.env.DATABASE_URL;
+const mongoDB = process.env.MONGODB_URI;
 
 main().catch((err) => console.log(err));
 
