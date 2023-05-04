@@ -94,9 +94,54 @@ exports.bookinstance_delete_post = asyncHandler(async (req, res, next) => {
 });
 
 exports.bookinstance_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update GET");
+  const bookinstance = await BookInstance.findById(req.params.id).populate("book").exec();
+  const allBooks = await Book.find({}, "title").exec();
+
+  if (bookinstance === null) {
+    const err = new Error("Author not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("bookinstance_form", {
+    title: "Update Book Instance",
+    bookinstance,
+    book_list: allBooks,
+  });
 });
 
-exports.bookinstance_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update POST");
-});
+exports.bookinstance_update_post = [
+  body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
+  body("imprint", "Imprint must be specified")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("status").escape(),
+  body("due_back", "Invalid date")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const bookinstance = new BookInstance({
+      book: req.body.book,
+      imprint: req.body.imprint,
+      status: req.body.status,
+      due_back: req.body.due_back,
+      _id: req.params.id,
+    });
+
+    if (!errors.isEmpty()) {
+      res.render("bookinstance_form", {
+        title: "Update Book Instance",
+        bookinstance,
+        errors: errors.array(),
+      });
+    } else {
+      const thebookinstance = await BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {});
+      res.redirect(thebookinstance.url);
+    }
+  }),
+];
